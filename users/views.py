@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from .serializers import UserSerializer, RegisterSerializer
 from knox.views import LoginView as KnoxLoginView
 from rest_framework import status, generics
@@ -8,7 +8,7 @@ from knox.models import AuthToken
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from django.contrib.auth import login
 from rest_framework.views import APIView
-from django.shortcuts import render, HttpResponse, HttpResponseRedirect
+from django.shortcuts import render, HttpResponse, HttpResponseRedirect, get_object_or_404
 import requests
 from django.urls import reverse
 
@@ -49,7 +49,12 @@ class GetAllUser(APIView):
             'message': 'Get all user successfully!'
         })
 
+class GetUser(APIView):
+    permission_classes = (IsAuthenticated, IsAdminUser)
 
+    def get(self, request, id):
+        user = get_object_or_404(User,id=id)
+        return Response(UserSerializer(user).data)
 def index(request):
     return render(request, 'users/Login.html')
 
